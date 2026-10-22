@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#642d88">
+
+    <title>Cantinho do Açaí | Monte seu pedido</title>
+    <meta name="description" content="Monte seu açaí, escolha seus adicionais e calcule a entrega.">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <header class="cabecalho">
+        <a href="#" class="logo">
+            <span>🍇</span>
+            <span>Cantinho <strong>do Açaí</strong></span>
+        </a>
+        <span class="selo">Feito com carinho 💜</span>
+    </header>
+
+    <section class="banner">
+        <div>
+            <p class="etiqueta">SEU MOMENTO MAIS GOSTOSO</p>
+            <h1>Seu açaí.<br><span>Suas escolhas.</span></h1>
+            <p class="descricao">
+                Monte sua combinação favorita, confira o preço
+                e receba no conforto de casa!
+            </p>
+            <a class="botao-banner" href="#montar">Montar meu açaí ↓</a>
+        </div>
+
+        <div class="banner-imagem">
+            <img
+                src="acai-titulo.jpg"
+                alt="Açaí com frutas e granola"
+                fetchpriority="high"
+                width="420"
+                height="320">
+        </div>
+    </section>
+
+    <main id="montar">
+        <div class="titulo-secao">
+            <p class="etiqueta">É FÁCIL E DIVERTIDO</p>
+            <h2>Monte seu copo</h2>
+            <p>Escolha o tamanho, os adicionais e informe onde entregar.</p>
+        </div>
+
+        <div class="layout">
+
+            <div class="coluna-esquerda">
+
+                <section class="cartao">
+                    <div class="cabecalho-etapa">
+                        <span class="numero">01</span>
+                        <div>
+                            <h3>Escolha o tamanho</h3>
+                            <p>Quanto açaí vai deixar seu dia melhor?</p>
+                        </div>
+                    </div>
+
+                    <div class="tamanhos">
+                        <label class="opcao-tamanho">
+                            <input type="radio" name="tamanho"
+                                value="12" data-nome="300 ml" checked>
+                            <span class="emoji-tamanho">🥤</span>
+                            <strong>300 ml</strong>
+                            <span class="preco">R$ 12,00</span>
+                            <small>Até 2 adicionais</small>
+                        </label>
+
+                        <label class="opcao-tamanho">
+                            <input type="radio" name="tamanho"
+                                value="16" data-nome="500 ml">
+                            <span class="emoji-tamanho">🥤</span>
+                            <strong>500 ml</strong>
+                            <span class="preco">R$ 16,00</span>
+                            <small>Até 4 adicionais</small>
+                        </label>
+
+                        <label class="opcao-tamanho">
+                            <input type="radio" name="tamanho"
+                                value="20" data-nome="700 ml">
+                            <span class="emoji-tamanho">🥤</span>
+                            <strong>700 ml</strong>
+                            <span class="preco">R$ 20,00</span>
+                            <small>Sem limite definido</small>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="cartao">
+                    <div class="cabecalho-etapa">
+                        <span class="numero">02</span>
+                        <div>
+                            <h3>Escolha os adicionais</h3>
+                            <p>Toque nos ingredientes que você gosta.</p>
+                        </div>
+                    </div>
+
+                    <div id="aviso-limite" class="aviso">
+                        Copo de 300 ml: até 2 adicionais.
+                    </div>
+
+                    <div class="contador">
+                        Adicionais escolhidos
+                        <strong id="contador-adicionais">0</strong>
+                    </div>
+
+                    <div class="ingredientes">
+
+                        <label class="ingrediente">
+                            <input type="checkbox" class="adicional"
+                                value="2" data-nome="Leite em pó">
+                            <img src="leite-em-po.jpg"
+                                alt="Leite em pó" width="140" height="100"
+                                loading="lazy" decoding="async">
+                            <strong>Leite em pó</strong>
+                            <span>+ R$ 2,00</span>
+                        </label>
+
+                        <label class="ingrediente">
+                            <input type="checkbox" class="adicional"
+                                value="2" data-nome="Banana">
+                            <img src="banana.jpg"
+                                alt="Banana" width="140" height="100"
+                                loading="lazy" decoding="async">
+                            <strong>Banana</strong>
+                            <span>+ R$ 2,00</span>
+                        </label>
+
+                        <label class="ingrediente">
+                            <input type="checkbox" class="adicional"
+                                value="2" data-nome="Granola">
+                            <img src="granola.jpg"
+                                alt="Granola crocante" width="140" height="100"
+                                loading="lazy" decoding="async">
+                            <strong>Granola</strong>
+                            <span>+ R$ 2,00</span>
+                        </label>
+
+                        <label class="ingrediente">
+                            <input type="checkbox" class="adicional"
+                                value="2" data-nome="Leite condensado">
+                            <img src="leite-condensado.jpg"
+                                alt="Leite condensado" width="140" height="100"
+                                loading="lazy" decoding="async">
+                            <strong>Leite condensado</strong>
+                            <span>+ R$ 2,00</span>
+                        </label>
+
+                        <label class="ingrediente">
+                            <input type="checkbox" class="adicional"
+                                value="3" data-nome="Morango">
+                            <img src="morango.jpg"
+                                alt="Morango" width="140" height="100"
+                                loading="lazy" decoding="async">
+                            <strong>Morango</strong>
+                            <span>+ R$ 3,00</span>
+                        </label>
+
+                        <label class="ingrediente">
+                            <input type="checkbox" class="adicional"
+                                value="2" data-nome="Confete">
+                            <img src="confete.jpg"
+                                alt="Confetes coloridos" width="140" height="100"
+                                loading="lazy" decoding="async">
+                            <strong>Confete</strong>
+                            <span>+ R$ 2,00</span>
+                        </label>
+
+                    </div>
+                </section>
+
+                <section class="cartao">
+                    <div class="cabecalho-etapa">
+                        <span class="numero">03</span>
+                        <div>
+                            <h3>Onde vamos entregar?</h3>
+                            <p>Preencha seus dados para continuar.</p>
+                        </div>
+                    </div>
+
+                    <form id="form-entrega" novalidate>
+
+                        <label class="campo">
+                            Nome completo *
+                            <input
+                                type="text"
+                                id="nome"
+                                name="nome"
+                                placeholder="Digite seu nome"
+                                autocomplete="name"
+                                maxlength="100"
+                                required>
+                        </label>
+
+                        <label class="campo">
+                            Telefone com DDD *
+                            <input
+                                type="tel"
+                                id="telefone"
+                                name="telefone"
+                                placeholder="(41) 99999-9999"
+                                autocomplete="tel"
+                                inputmode="tel"
+                                maxlength="15"
+                                required
+                                aria-describedby="ajuda-telefone">
+                            <small id="ajuda-telefone">
+                                Informe o DDD e o número do celular.
+                            </small>
+                        </label>
+
+                        <div class="linha-campos">
+                            <label class="campo">
+                                Rua / Avenida *
+                                <input
+                                    type="text"
+                                    id="rua"
+                                    name="rua"
+                                    placeholder="Nome da rua"
+                                    autocomplete="street-address"
+                                    maxlength="150"
+                                    required>
+                            </label>
+
+                            <label class="campo campo-numero">
+                                Número *
+                                <input
+                                    type="text"
+                                    id="numero-casa"
+                                    name="numero-casa"
+                                    placeholder="Nº"
+                                    maxlength="15"
+                                    required>
+                            </label>
+                        </div>
+
+                        <label class="campo">
+                            Bairro *
+                            <input
+                                type="text"
+                                id="bairro"
+                                name="bairro"
+                                placeholder="Digite seu bairro"
+                                autocomplete="address-level3"
+                                maxlength="80"
+                                required>
+                            <small>Centro tem taxa de R$ 5,00. Outros bairros: R$ 10,00.</small>
+                        </label>
+
+                        <label class="campo">
+                            Complemento (opcional)
+                            <input
+                                type="text"
+                                id="complemento"
+                                name="complemento"
+                                placeholder="Apartamento, bloco, referência..."
+                                maxlength="150">
+                        </label>
+
+                        <label class="campo">
+                            Observação para o entregador (opcional)
+                            <textarea
+                                id="observacao"
+                                name="observacao"
+                                rows="2"
+                                maxlength="250"
+                                placeholder="Ex.: portão azul, casa ao lado da padaria"></textarea>
+                        </label>
+
+                    </form>
+                </section>
+
+            </div>
+
+            <aside class="coluna-direita">
+                <section class="cartao resumo-cartao">
+
+                    <div class="titulo-resumo">
+                        <p class="etiqueta">OLHA QUE DELÍCIA!</p>
+                        <h3>Seu açaí tomando forma</h3>
+                    </div>
+
+                    <div class="cena-copo">
+                        <span class="brilho brilho-um">✦</span>
+                        <span class="brilho brilho-dois">✧</span>
+
+                        <div class="copo">
+                            <div class="borda-copo"></div>
+
+                            <div id="liquido" class="liquido">
+                                <div class="calda calda-um"></div>
+                                <div class="calda calda-dois"></div>
+                                <div id="decoracao-copo" class="decoracao-copo"></div>
+                            </div>
+
+                            <div class="marca-copo">
+                                <span>💜</span>
+                                <strong>Cantinho</strong>
+                                <small>do Açaí</small>
+                            </div>
+                            <div class="brilho-copo"></div>
+                        </div>
+                        <div class="sombra-copo"></div>
+                    </div>
+
+                    <div class="medidor">
+                        <div class="linha-resumo">
+                            <span>Tamanho</span>
+                            <strong id="medidor-tamanho">300 ml</strong>
+                        </div>
+                        <div class="barra-medidor">
+                            <div id="barra-preenchimento"></div>
+                        </div>
+                        <p id="texto-preenchimento">
+                            Escolha seus adicionais!
+                        </p>
+                    </div>
+
+                    <div class="detalhes-pedido">
+                        <h3>🛍️ Resumo do pedido</h3>
+
+                        <div class="linha-resumo">
+                            <span>Açaí</span>
+                            <strong id="preco-base">R$ 12,00</strong>
+                        </div>
+
+                        <div class="linha-resumo">
+                            <span>Adicionais</span>
+                            <strong id="preco-adicionais">R$ 0,00</strong>
+                        </div>
+
+                        <ul id="lista-adicionais">
+                            <li>Nenhum adicional selecionado</li>
+                        </ul>
+
+                        <div class="linha-resumo">
+                            <span>Entrega</span>
+                            <strong id="preco-entrega">R$ 10,00</strong>
+                        </div>
+
+                        <p class="aviso-endereco">
+                            📍 A taxa é calculada pelo bairro informado.
+                        </p>
+
+                        <div class="total">
+                            <span>Total do pedido</span>
+                            <strong id="valor-total">R$ 22,00</strong>
+                        </div>
+
+                        <button type="button" id="confirmar-pedido">
+                            Confirmar pedido <span>♡</span>
+                        </button>
+
+                        <p id="mensagem" role="status" aria-live="polite"></p>
+
+                        <p class="nota">
+                            Confira o endereço e o telefone antes de confirmar.
+                        </p>
+                    </div>
+
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        <div class="logo logo-rodape">🍇 Cantinho <strong>do Açaí</strong></div>
+        <p>Um cantinho de sabor, feito com carinho. 💜</p>
+    </footer>
+
+</body>
+</html>
