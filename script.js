@@ -1,389 +1,315 @@
 
-const tamanhos = document.querySelectorAll('input[name="tamanho"]');
-const adicionais = document.querySelectorAll('.adicional');
+const $ = (seletor) => document.querySelector(seletor);
+const $$ = (seletor) => [...document.querySelectorAll(seletor)];
 
-const nome = document.getElementById('nome');
-const telefone = document.getElementById('telefone');
-const rua = document.getElementById('rua');
-const numeroCasa = document.getElementById('numero-casa');
-const bairro = document.getElementById('bairro');
-const complemento = document.getElementById('complemento');
-const observacao = document.getElementById('observacao');
-
-const contador = document.getElementById('contador-adicionais');
-const avisoLimite = document.getElementById('aviso-limite');
-const mensagem = document.getElementById('mensagem');
-
-const precoBase = document.getElementById('preco-base');
-const precoAdicionais = document.getElementById('preco-adicionais');
-const precoEntrega = document.getElementById('preco-entrega');
-const valorTotal = document.getElementById('valor-total');
-
-const resumoTamanho = document.getElementById('medidor-tamanho');
-const listaAdicionais = document.getElementById('lista-adicionais');
-const liquido = document.getElementById('liquido');
-const decoracaoCopo = document.getElementById('decoracao-copo');
-const barraPreenchimento = document.getElementById('barra-preenchimento');
-const textoPreenchimento = document.getElementById('texto-preenchimento');
-
-const botaoConfirmar = document.getElementById('confirmar-pedido');
-
-const simbolos = {
-    'Leite em pó': '🥛',
-    'Banana': '🍌',
-    'Granola': '🌾',
-    'Leite condensado': '🥛',
-    'Morango': '🍓',
-    'Confete': '🍬'
+const precosCopos = {
+  300: 12,
+  500: 16,
+  700: 20
 };
 
-function dinheiro(valor) {
-    return Number(valor).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    });
+const bairro = $("#bairro");
+const rua = $("#rua");
+const listaRuas = $("#lista-ruas");
+const telefone = $("#telefone");
+const formulario = $("#form-pedido");
+const avisoAdicionais = $("#aviso-adicionais");
+
+const adicionais = $$('input[name="adicional"]');
+const tamanhos = $$('input[name="tamanho"]');
+
+const dinheiro = (valor) =>
+  valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+
+function obterTamanho() {
+  return Number($('input[name="tamanho"]:checked').value);
 }
 
-function tamanhoSelecionado() {
-    return document.querySelector('input[name="tamanho"]:checked');
+function obterLimite(tamanho) {
+  if (tamanho === 300) return 2;
+  if (tamanho === 500) return 4;
+
+  // O copo de 700 ml não tem limite configurado nesta versão.
+  return Infinity;
 }
 
-function adicionaisSelecionados() {
-    return Array.from(adicionais).filter(function(item) {
-        return item.checked;
-    });
+function obterAdicionaisSelecionados() {
+  return adicionais.filter((item) => item.checked);
 }
 
-function limiteAdicionais(tamanho) {
-    if (tamanho === '300 ml') return 2;
-    if (tamanho === '500 ml') return 4;
-
-    return Infinity;
+function calcularAdicionais() {
+  return obterAdicionaisSelecionados().reduce((total, item) => {
+    return total + Number(item.dataset.preco);
+  }, 0);
 }
 
-// Calcula a taxa de entrega pelo bairro.
 function calcularEntrega() {
-    const nomeBairro = bairro.value.trim();
+  const nomeBairro = bairro.value.trim().toLocaleLowerCase("pt-BR");
 
-    if (nomeBairro.toLocaleLowerCase('pt-BR') === 'centro') {
-        return 5;
-    }
+  if (!nomeBairro) return 10;
 
-    return 10;
+  if (nomeBairro === "centro") return 5;
+
+  return 10;
 }
 
-function mostrarAviso(texto, erro = false) {
-    avisoLimite.textContent = texto;
+function atualizarAvisoAdicionais() {
+  const tamanho = obterTamanho();
+  const limite = obterLimite(tamanho);
+  const selecionados = obterAdicionaisSelecionados();
 
-    if (erro) {
-        avisoLimite.style.background = '#fff0f0';
-        avisoLimite.style.borderColor = '#f2c5c5';
-        avisoLimite.style.color = '#b43d4b';
-    } else {
-        avisoLimite.style.background = '#eafaf7';
-        avisoLimite.style.borderColor = '#c8eee8';
-        avisoLimite.style.color = '#247e77';
+  if (selecionados.length > limite) {
+    const ultimo = selecionados[selecionados.length - 1];
+    ultimo.checked = false;
+  }
+
+  const quantidade = obterAdicionaisSelecionados().length;
+
+  if (limite === Infinity) {
+    avisoAdicionais.textContent =
+      `Você selecionou ${quantidade} adicional(is) para o copo de 700 ml.`;
+  } else {
+    avisoAdicionais.textContent =
+      `Você selecionou ${quantidade} de ${limite} adicionais disponíveis.`;
+
+    if (quantidade === limite) {
+      avisoAdicionais.textContent += " Limite atingido!";
     }
+  }
+
+  avisoAdicionais.classList.remove("erro");
 }
 
-function atualizarCopo(tamanho, quantidade, itens) {
-    let nivel = 43;
-
-    if (tamanho === '500 ml') nivel = 60;
-    if (tamanho === '700 ml') nivel = 76;
-
-    nivel = Math.min(nivel + quantidade * 4, 94);
-
-    liquido.style.height = nivel + '%';
-    barraPreenchimento.style.width = nivel + '%';
-    resumoTamanho.textContent = tamanho;
-
-    if (quantidade === 0) {
-        textoPreenchimento.textContent =
-            'Seu açaí está esperando seus adicionais!';
-    } else {
-        textoPreenchimento.textContent =
-            'Seu açaí está ficando delicioso!';
-    }
-
-    decoracaoCopo.innerHTML = '';
-
-    itens.forEach(function(item) {
-        const simbolo = document.createElement('span');
-
-        simbolo.textContent = simbolos[item.dataset.nome] || '✨';
-        simbolo.title = item.dataset.nome;
-
-        decoracaoCopo.appendChild(simbolo);
-    });
-}
-
-// Atualiza preços, lista, taxa e simulação.
 function atualizarPedido() {
-    const tamanho = tamanhoSelecionado();
+  const tamanho = obterTamanho();
+  const precoCopo = precosCopos[tamanho];
+  const precoAdicionais = calcularAdicionais();
+  const precoEntrega = calcularEntrega();
+  const total = precoCopo + precoAdicionais + precoEntrega;
 
-    if (!tamanho) return;
+  $("#preco-copo").textContent = dinheiro(precoCopo);
+  $("#preco-adicionais").textContent = dinheiro(precoAdicionais);
+  $("#preco-entrega").textContent = dinheiro(precoEntrega);
+  $("#valor-total").textContent = dinheiro(total);
+  $("#total-final").textContent = dinheiro(total);
 
-    const itens = adicionaisSelecionados();
-    const precoTamanho = Number(tamanho.value);
+  atualizarAvisoAdicionais();
 
-    let somaAdicionais = 0;
+  const quantidade = obterAdicionaisSelecionados().length;
+  const recheio = $("#recheio-copo");
 
-    itens.forEach(function(item) {
-        somaAdicionais += Number(item.value);
-    });
+  // O copo enche visualmente conforme a quantidade escolhida.
+  const preenchimento = Math.min(25 + quantidade * 15, 95);
+  recheio.style.height = `${preenchimento}%`;
 
-    const entrega = calcularEntrega();
-    const total = precoTamanho + somaAdicionais + entrega;
-
-    contador.textContent = itens.length;
-
-    precoBase.textContent = dinheiro(precoTamanho);
-    precoAdicionais.textContent = dinheiro(somaAdicionais);
-    precoEntrega.textContent = dinheiro(entrega);
-    valorTotal.textContent = dinheiro(total);
-
-    listaAdicionais.innerHTML = '';
-
-    if (itens.length === 0) {
-        const linha = document.createElement('li');
-        linha.textContent = 'Nenhum adicional selecionado';
-        listaAdicionais.appendChild(linha);
-    } else {
-        itens.forEach(function(item) {
-            const linha = document.createElement('li');
-            const nomeItem = document.createElement('span');
-            const precoItem = document.createElement('strong');
-
-            nomeItem.textContent = item.dataset.nome;
-            precoItem.textContent = dinheiro(Number(item.value));
-
-            linha.appendChild(nomeItem);
-            linha.appendChild(precoItem);
-            listaAdicionais.appendChild(linha);
-        });
-    }
-
-    atualizarCopo(tamanho.dataset.nome, itens.length, itens);
+  if (quantidade === 0) {
+    $("#texto-copo").textContent =
+      "Seu açaí está esperando os adicionais!";
+  } else {
+    $("#texto-copo").textContent =
+      `Seu açaí está com ${quantidade} adicional(is). Que delícia!`;
+  }
 }
 
-// Limita a seleção de adicionais.
-adicionais.forEach(function(item) {
-    item.addEventListener('change', function() {
-        const tamanho = tamanhoSelecionado().dataset.nome;
-        const limite = limiteAdicionais(tamanho);
-        const itens = adicionaisSelecionados();
+// Lista inicial de exemplos de ruas por bairro.
+// Acrescente mais ruas conforme obtiver uma base confiável.
+const ruasPorBairro = {
+  "centro": [
+    "Avenida Almirante Pedro Álvares Cabral",
+    "Rua Benedito Soares Pinto",
+    "Rua Centenário",
+    "Rua Xavier da Silva",
+    "Rua Marechal Deodoro"
+  ],
 
-        if (item.checked && itens.length > limite) {
-            item.checked = false;
+  "bom jesus": [
+    "Avenida Ademar de Barros",
+    "Avenida Antônio Munari",
+    "Avenida Bom Jesus"
+  ],
 
-            mostrarAviso(
-                'Limite atingido! O copo de ' + tamanho +
-                ' aceita no máximo ' + limite + ' adicionais.',
-                true
-            );
-        } else {
-            mostrarAviso(
-                limite === Infinity
-                    ? 'O copo de 700 ml não tem limite de adicionais.'
-                    : 'O copo de ' + tamanho + ' aceita até ' +
-                      limite + ' adicionais.'
-            );
-        }
+  "jardim keli cristina": [
+    "Alameda Oscar Muxfeldt"
+  ],
 
-        atualizarPedido();
-    });
-});
+  "vila gilcy": [
+    "Avenida Arapongas"
+  ]
+};
 
-// Se o tamanho mudar, remove os adicionais excedentes.
-tamanhos.forEach(function(item) {
-    item.addEventListener('change', function() {
-        const tamanho = item.dataset.nome;
-        const limite = limiteAdicionais(tamanho);
-        const itens = adicionaisSelecionados();
-
-        let removidos = 0;
-
-        while (itens.length > limite) {
-            itens.pop().checked = false;
-            removidos++;
-        }
-
-        if (removidos > 0) {
-            mostrarAviso(
-                'Você mudou para ' + tamanho + '. ' +
-                removidos + ' adicional(is) foram removidos.',
-                true
-            );
-        } else {
-            mostrarAviso(
-                limite === Infinity
-                    ? 'O copo de 700 ml não tem limite de adicionais.'
-                    : 'O copo de ' + tamanho + ' aceita até ' +
-                      limite + ' adicionais.'
-            );
-        }
-
-        atualizarPedido();
-    });
-});
-
-// Atualiza a taxa quando o bairro é alterado.
-bairro.addEventListener('input', atualizarPedido);
-
-// Formata o telefone enquanto o cliente digita.
-telefone.addEventListener('input', function() {
-    let numeros = telefone.value.replace(/\D/g, '');
-
-    if (numeros.length > 11) {
-        numeros = numeros.slice(0, 11);
-    }
-
-    if (numeros.length > 10) {
-        telefone.value = numeros.replace(
-            /^(\d{2})(\d{5})(\d{4})$/,
-            '($1) $2-$3'
-        );
-    } else if (numeros.length > 6) {
-        telefone.value = numeros.replace(
-            /^(\d{2})(\d{4})(\d{0,4})$/,
-            function(_, ddd, parte1, parte2) {
-                return '(' + ddd + ') ' + parte1 +
-                    (parte2 ? '-' + parte2 : '');
-            }
-        );
-    } else if (numeros.length > 2) {
-        telefone.value = '(' + numeros.slice(0, 2) + ') ' +
-            numeros.slice(2);
-    } else if (numeros.length > 0) {
-        telefone.value = '(' + numeros;
-    }
-});
-
-// Valida os campos antes de confirmar.
-function validarPedido() {
-    const campos = [
-        { campo: nome, descricao: 'Digite seu nome completo.' },
-        { campo: telefone, descricao: 'Informe seu telefone com DDD.' },
-        { campo: rua, descricao: 'Informe a rua ou avenida.' },
-        { campo: numeroCasa, descricao: 'Informe o número do endereço.' },
-        { campo: bairro, descricao: 'Informe seu bairro.' }
-    ];
-
-    for (const item of campos) {
-        if (!item.campo.value.trim()) {
-            mostrarErro(item.descricao);
-            item.campo.focus();
-            return false;
-        }
-    }
-
-    const numeros = telefone.value.replace(/\D/g, '');
-
-    if (numeros.length !== 10 && numeros.length !== 11) {
-        mostrarErro(
-            'Telefone inválido! Digite o DDD e um número com 8 ou 9 dígitos.'
-        );
-
-        telefone.focus();
-        return false;
-    }
-
-    if (/^(\d)\1+$/.test(numeros)) {
-        mostrarErro('Confira o telefone informado.');
-        telefone.focus();
-        return false;
-    }
-
-    const tamanho = tamanhoSelecionado();
-    const itens = adicionaisSelecionados();
-
-    if (itens.length > limiteAdicionais(tamanho.dataset.nome)) {
-        mostrarErro('A quantidade de adicionais ultrapassou o limite.');
-        return false;
-    }
-
-    return true;
+function normalizar(texto) {
+  return texto
+    .trim()
+    .toLocaleLowerCase("pt-BR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
-function mostrarErro(texto) {
-    mensagem.textContent = '⚠️ ' + texto;
-    mensagem.classList.add('erro');
+function atualizarSugestoesRuas() {
+  const bairroEscolhido = normalizar(bairro.value);
+
+  listaRuas.innerHTML = "";
+
+  const chave = Object.keys(ruasPorBairro).find((nome) => {
+    return normalizar(nome) === bairroEscolhido;
+  });
+
+  if (!chave) {
+    rua.placeholder = "Digite a rua; sugestões disponíveis para alguns bairros";
+    return;
+  }
+
+  ruasPorBairro[chave].forEach((nomeRua) => {
+    const opcao = document.createElement("option");
+    opcao.value = nomeRua;
+    listaRuas.appendChild(opcao);
+  });
+
+  rua.placeholder = "Digite ou selecione uma rua sugerida";
 }
 
-// Confirma o pedido somente se os dados forem válidos.
-botaoConfirmar.addEventListener('click', function() {
-    mensagem.textContent = '';
-    mensagem.classList.remove('erro');
+function formatarTelefone() {
+  let numeros = telefone.value.replace(/\D/g, "").slice(0, 11);
 
-    if (!validarPedido()) {
-        return;
+  if (numeros.length > 10) {
+    numeros = numeros.replace(
+      /^(\d{2})(\d{5})(\d{4})$/,
+      "($1) $2-$3"
+    );
+  } else if (numeros.length > 6) {
+    numeros = numeros.replace(
+      /^(\d{2})(\d{4})(\d{0,4})$/,
+      (_, ddd, inicio, fim) =>
+        fim ? `(${ddd}) ${inicio}-${fim}` : `(${ddd}) ${inicio}`
+    );
+  } else if (numeros.length > 2) {
+    numeros = numeros.replace(/^(\d{2})(\d+)/, "($1) $2");
+  }
+
+  telefone.value = numeros;
+}
+
+function validarTelefone() {
+  const numeros = telefone.value.replace(/\D/g, "");
+
+  if (numeros.length !== 10 && numeros.length !== 11) {
+    alert("Digite um telefone válido com DDD. Exemplo: (41) 99999-9999.");
+    telefone.focus();
+    return false;
+  }
+
+  if (/^(\d)\1+$/.test(numeros)) {
+    alert("Confira o telefone digitado.");
+    telefone.focus();
+    return false;
+  }
+
+  return true;
+}
+
+function validarAdicionais() {
+  const tamanho = obterTamanho();
+  const limite = obterLimite(tamanho);
+  const quantidade = obterAdicionaisSelecionados().length;
+
+  if (quantidade > limite) {
+    alert(`O copo de ${tamanho} ml permite até ${limite} adicionais.`);
+    return false;
+  }
+
+  return true;
+}
+
+tamanhos.forEach((item) => {
+  item.addEventListener("change", () => {
+    const tamanho = obterTamanho();
+    const limite = obterLimite(tamanho);
+    const selecionados = obterAdicionaisSelecionados();
+
+    while (selecionados.length > limite) {
+      selecionados[selecionados.length - 1].checked = false;
+      selecionados.pop();
     }
 
-    const tamanho = tamanhoSelecionado();
-    const itens = adicionaisSelecionados();
-
-    const pedido = {
-        nome: nome.value.trim(),
-        telefone: telefone.value.trim(),
-        endereco: {
-            rua: rua.value.trim(),
-            numero: numeroCasa.value.trim(),
-            bairro: bairro.value.trim(),
-            complemento: complemento.value.trim(),
-            observacao: observacao.value.trim()
-        },
-        tamanho: tamanho.dataset.nome,
-        adicionais: itens.map(function(item) {
-            return {
-                nome: item.dataset.nome,
-                preco: Number(item.value)
-            };
-        }),
-        subtotalAcaí: Number(tamanho.value) +
-            itens.reduce(function(soma, item) {
-                return soma + Number(item.value);
-            }, 0),
-        taxaEntrega: calcularEntrega(),
-        total: Number(tamanho.value) +
-            itens.reduce(function(soma, item) {
-                return soma + Number(item.value);
-            }, 0) + calcularEntrega()
-    };
-
-    const resumo = [
-        'PEDIDO - CANTINHO DO AÇAÍ',
-        '',
-        'Cliente: ' + pedido.nome,
-        'Telefone: ' + pedido.telefone,
-        'Endereço: ' + pedido.endereco.rua + ', ' +
-            pedido.endereco.numero,
-        'Bairro: ' + pedido.endereco.bairro,
-        pedido.endereco.complemento
-            ? 'Complemento: ' + pedido.endereco.complemento
-            : '',
-        pedido.endereco.observacao
-            ? 'Referência: ' + pedido.endereco.observacao
-            : '',
-        '',
-        'Tamanho: ' + pedido.tamanho,
-        'Adicionais: ' +
-            (pedido.adicionais.length
-                ? pedido.adicionais.map(function(item) {
-                    return item.nome;
-                }).join(', ')
-                : 'Nenhum'),
-        'Açaí e adicionais: ' + dinheiro(pedido.subtotalAcaí),
-        'Entrega: ' + dinheiro(pedido.taxaEntrega),
-        'TOTAL: ' + dinheiro(pedido.total)
-    ].filter(Boolean).join('\n');
-
-    mensagem.classList.remove('erro');
-    mensagem.textContent =
-        'Pedido conferido! Confira os dados na janela de confirmação.';
-
-    alert(resumo);
+    atualizarPedido();
+  });
 });
 
-// Inicia os valores do pedido.
+adicionais.forEach((item) => {
+  item.addEventListener("change", () => {
+    const tamanho = obterTamanho();
+    const limite = obterLimite(tamanho);
+    const selecionados = obterAdicionaisSelecionados();
+
+    if (selecionados.length > limite) {
+      item.checked = false;
+      avisoAdicionais.textContent =
+        `O copo de ${tamanho} ml permite até ${limite} adicionais.`;
+      avisoAdicionais.classList.add("erro");
+      alert(`Você atingiu o limite de adicionais para o copo de ${tamanho} ml.`);
+    }
+
+    atualizarPedido();
+  });
+});
+
+bairro.addEventListener("input", () => {
+  atualizarSugestoesRuas();
+  atualizarPedido();
+});
+
+telefone.addEventListener("input", formatarTelefone);
+
+formulario.addEventListener("submit", (evento) => {
+  evento.preventDefault();
+
+  if (!formulario.reportValidity()) return;
+
+  if (!validarTelefone()) return;
+
+  if (!validarAdicionais()) return;
+
+  const nome = $("#nome").value.trim();
+  const telefoneInformado = telefone.value.trim();
+  const bairroInformado = bairro.value.trim();
+  const ruaInformada = rua.value.trim();
+  const numero = $("#numero-casa").value.trim();
+  const complemento = $("#complemento").value.trim();
+  const observacoes = $("#observacoes").value.trim();
+
+  const tamanho = obterTamanho();
+  const selecionados = obterAdicionaisSelecionados();
+
+  const nomesAdicionais = selecionados.length
+    ? selecionados.map((item) => item.value).join(", ")
+    : "Nenhum";
+
+  const precoCopo = precosCopos[tamanho];
+  const precoAdicionais = calcularAdicionais();
+  const precoEntrega = calcularEntrega();
+  const total = precoCopo + precoAdicionais + precoEntrega;
+
+  const resumo =
+    `PEDIDO - CANTINHO DO AÇAÍ\n\n` +
+    `Nome: ${nome}\n` +
+    `Telefone: ${telefoneInformado}\n` +
+    `Tamanho: ${tamanho} ml\n` +
+    `Adicionais: ${nomesAdicionais}\n\n` +
+    `Rua: ${ruaInformada}, ${numero}\n` +
+    `Bairro: ${bairroInformado}\n` +
+    `Complemento: ${complemento || "Não informado"}\n` +
+    `Observações: ${observacoes || "Nenhuma"}\n\n` +
+    `Açaí: ${dinheiro(precoCopo)}\n` +
+    `Adicionais: ${dinheiro(precoAdicionais)}\n` +
+    `Entrega: ${dinheiro(precoEntrega)}\n` +
+    `TOTAL: ${dinheiro(total)}\n\n` +
+    `Atenção: este pedido ainda não foi enviado à loja.`;
+
+  alert(resumo);
+});
+
+atualizarSugestoesRuas();
 atualizarPedido();
